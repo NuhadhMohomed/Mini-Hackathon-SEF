@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Package, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, Package, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,16 +8,43 @@ import InventoryFilter from '@/features/inventory/components/InventoryFilter';
 import InventoryTable from '@/features/inventory/components/InventoryTable';
 import AddIngredientModal from '@/features/inventory/components/AddIngredientModal';
 import UpdateStockModal from '@/features/inventory/components/UpdateStockModal';
-import { initialLarderInventory } from '@/features/inventory/services/inventoryMockService';
+import { inventoryService } from '@/features/inventory/services/inventoryService';
 
 export default function InventoryPage() {
-  const [items, setItems] = useState(initialLarderInventory);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => inventoryService.getInventory(),
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (newItem) => inventoryService.addIngredient(newItem),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    },
+  });
+
+  const updateStockMutation = useMutation({
+    mutationFn: ({ itemId, newStockTotal }) => {
+      const existing = items.find((i) => i.id === itemId);
+      return inventoryService.updateIngredient(itemId, {
+        name: existing?.ingredient || existing?.name,
+        available: newStockTotal,
+        unit: existing?.unit,
+        minimumStock: existing?.minimumStock,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    },
+  });
 
   const handleOpenAddModal = () => {
     setAddModalOpen(true);
@@ -28,19 +56,19 @@ export default function InventoryPage() {
   };
 
   const handleSaveNewIngredient = (newItem) => {
-    setItems((prev) => [newItem, ...prev]);
+    addMutation.mutate(newItem);
   };
 
   const handleSaveStockUpdate = (itemId, newStockTotal) => {
-    setItems((prev) =>
-      prev.map((i) => (i.id === itemId ? { ...i, available: newStockTotal } : i))
-    );
+    updateStockMutation.mutate({ itemId, newStockTotal });
   };
 
   const filteredItems = items.filter((item) => {
+    const ingredientName = item.ingredient || item.name || '';
+    const unitName = item.unit || '';
     const matchesSearch =
-      item.ingredient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.unit.toLowerCase().includes(searchQuery.toLowerCase());
+      ingredientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      unitName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
@@ -51,7 +79,7 @@ export default function InventoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Ingredient Inventory Management"
-        subtitle="Monitor larder stocks, safety thresholds, and log farm ingredient shipments."
+        subtitle="Monitor larder stocks, safety thresholds, and log farm ingredient shipments in the bakery database."
         breadcrumbs={[
           { label: 'Bakehouse Hub', href: '/app' },
           { label: 'Inventory' },
@@ -118,7 +146,14 @@ export default function InventoryPage() {
       />
 
       {/* Master Inventory Table */}
-      <InventoryTable items={filteredItems} onUpdateStock={handleOpenUpdateStock} />
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground font-mono">Fetching larder stocks from storehouse...</p>
+        </div>
+      ) : (
+        <InventoryTable items={filteredItems} onUpdateStock={handleOpenUpdateStock} />
+      )}
 
       {/* Add Ingredient Modal */}
       <AddIngredientModal
@@ -135,7 +170,7 @@ export default function InventoryPage() {
         }}
       />
 
-      {/* Update Stock Modal (Explicit Addition) */}
+      {/* Update Stock Modal */}
       <UpdateStockModal
         open={updateModalOpen}
         onOpenChange={setUpdateModalOpen}

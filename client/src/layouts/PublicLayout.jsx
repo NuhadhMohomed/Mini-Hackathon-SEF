@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,20 @@ import CartDrawer from '@/features/cart/components/CartDrawer';
 function PublicLayoutContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount, subtotal, openCart } = useCart();
+  const location = useLocation();
+
+  // Smooth scroll to anchor target when location hash is present or updated
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 80);
+      }
+    }
+  }, [location.pathname, location.hash]);
 
   const getNavLinkClass = ({ isActive }) =>
     `text-sm transition-colors hover:text-primary ${
@@ -63,12 +77,26 @@ function PublicLayoutContent() {
             <NavLink to="/products" className={getNavLinkClass}>
               Order Online
             </NavLink>
-            <a href="#about" className="text-sm font-medium text-secondary-foreground hover:text-foreground transition-colors">
+            <Link
+              to="/#about"
+              onClick={() => {
+                const el = document.getElementById('about');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-sm font-medium text-secondary-foreground hover:text-foreground transition-colors"
+            >
               About the Mill
-            </a>
-            <a href="#bakers-note" className="text-sm font-medium text-secondary-foreground hover:text-foreground transition-colors">
+            </Link>
+            <Link
+              to="/#bakers-note"
+              onClick={() => {
+                const el = document.getElementById('bakers-note');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-sm font-medium text-secondary-foreground hover:text-foreground transition-colors"
+            >
               Bakehouse Note
-            </a>
+            </Link>
           </nav>
 
           {/* Trailing Action Cluster */}
@@ -144,6 +172,28 @@ function PublicLayoutContent() {
               >
                 Order Online
               </NavLink>
+              <Link
+                to="/#about"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  const el = document.getElementById('about');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors min-h-[44px] flex items-center"
+              >
+                About the Mill
+              </Link>
+              <Link
+                to="/#bakers-note"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  const el = document.getElementById('bakers-note');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors min-h-[44px] flex items-center"
+              >
+                Bakehouse Note
+              </Link>
               <button
                 type="button"
                 onClick={() => {

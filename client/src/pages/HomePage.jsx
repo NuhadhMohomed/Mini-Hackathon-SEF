@@ -9,7 +9,11 @@ import {
   Sparkles,
   ShieldCheck,
   Calendar,
+  HeartHandshake,
+  Utensils,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { productService } from '@/features/products/services/productService';
 import { MOCK_PRODUCTS } from '@/features/products/services/productMockData';
 import ProductCard from '@/features/products/components/ProductCard';
 import { Button } from '@/components/ui/button';
@@ -17,7 +21,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function HomePage() {
-  const featuredProducts = MOCK_PRODUCTS.filter((p) => p.featured);
+  const { data: products = MOCK_PRODUCTS } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => productService.getProducts(),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const featuredProducts = products.filter((p) => p.featured || p.available).slice(0, 4);
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
@@ -180,7 +190,7 @@ export default function HomePage() {
             to="/products"
             className="text-xs sm:text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0"
           >
-            <span>Explore All {MOCK_PRODUCTS.length} Bakes</span>
+            <span>Explore All {products.length} Bakes</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -202,29 +212,222 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. HERITAGE PROVENANCE PROMISE */}
-      <section className="rounded-2xl border border-border/80 bg-surface-container-low/60 p-8 sm:p-12 space-y-6 text-center max-w-4xl mx-auto">
-        <div className="w-14 h-14 rounded-full bg-secondary text-primary mx-auto flex items-center justify-center">
-          <Sparkles className="w-7 h-7 stroke-[1.5]" />
+      {/* 4. ABOUT THE MILL & GRAIN PROVENANCE */}
+      <section id="about" className="scroll-mt-20 space-y-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border/70 pb-5">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[11px] font-semibold uppercase tracking-wider">
+                Grain Provenance &amp; Mill
+              </Badge>
+              <span className="font-mono text-xs text-muted-foreground">
+                Skagit Valley · Washington State
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+              About the Mill: Stone-Ground with Intention
+            </h2>
+            <p className="text-xs sm:text-sm text-secondary-foreground leading-relaxed">
+              We partner exclusively with independent regenerative farms and regional stone-mills like Cairnspring Mills and Bluebird Grain Farms. Never bleached, bromated, or industrially expedited.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 font-mono text-xs text-primary font-semibold bg-secondary px-3 py-1.5 rounded-xl self-start sm:self-end">
+            <Wheat className="w-4 h-4" />
+            <span>100% Certified Organic &amp; Non-GMO</span>
+          </div>
         </div>
-        <div className="space-y-2 max-w-2xl mx-auto">
-          <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground">
-            Our Stone-Ground Commitment
-          </h2>
-          <p className="text-xs sm:text-sm text-secondary-foreground leading-relaxed">
-            We partner exclusively with independent regenerative farms and regional stone-mills like Cairnspring Mills and Bluebird Grain Farms. Never bleached, bromated, or industrially expedited.
-          </p>
+
+        {/* 3 Sensory Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {/* Pillar 1 */}
+          <Card className="rounded-2xl border border-border/80 bg-card p-6 sm:p-7 space-y-4 hover:border-primary/40 transition-colors shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-secondary text-primary flex items-center justify-center">
+              <Wheat className="w-6 h-6 stroke-[1.75]" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl font-semibold text-foreground">
+                Slow Stone Grinding
+              </h3>
+              <p className="text-xs sm:text-sm text-secondary-foreground leading-relaxed">
+                Industrial roller mills strip away the germ and outer bran. Our regional partners grind whole grain berries between slow-rotating French granite stones at temperatures under 35°C, preserving essential fatty acids, vitamins, and sweet nutty aromatics.
+              </p>
+            </div>
+            <div className="pt-2 text-[11px] font-mono text-primary font-medium flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Cairnspring Yecora Rojo &amp; Trailblazer</span>
+            </div>
+          </Card>
+
+          {/* Pillar 2 */}
+          <Card className="rounded-2xl border border-border/80 bg-card p-6 sm:p-7 space-y-4 hover:border-primary/40 transition-colors shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-secondary text-primary flex items-center justify-center">
+              <HeartHandshake className="w-6 h-6 stroke-[1.75]" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl font-semibold text-foreground">
+                Regenerative Soil Partners
+              </h3>
+              <p className="text-xs sm:text-sm text-secondary-foreground leading-relaxed">
+                We know every farmer who grows our wheat. Our grain growers practice rotational cover cropping, low-disturbance soil care, and zero synthetic nitrogen fertilizer—restoring regional topsoil health while producing grain with remarkable mineral richness.
+              </p>
+            </div>
+            <div className="pt-2 text-[11px] font-mono text-primary font-medium flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Bluebird Grain Farms &amp; Skagit Valley</span>
+            </div>
+          </Card>
+
+          {/* Pillar 3 */}
+          <Card className="rounded-2xl border border-border/80 bg-card p-6 sm:p-7 space-y-4 hover:border-primary/40 transition-colors shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-secondary text-primary flex items-center justify-center">
+              <Flame className="w-6 h-6 stroke-[1.75]" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl font-semibold text-foreground">
+                36-Hour Wild Levain Ferment
+              </h3>
+              <p className="text-xs sm:text-sm text-secondary-foreground leading-relaxed">
+                Living flour needs time. We culture our doughs exclusively with our century-old orchard sourdough starter over a 36-hour cold proof. This allows wild lactobacilli to pre-digest gluten proteins and unlock the complex caramel tones in the hearth stone bake.
+              </p>
+            </div>
+            <div className="pt-2 text-[11px] font-mono text-primary font-medium flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Zero Commercial Yeasts or Additives</span>
+            </div>
+          </Card>
         </div>
-        <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground font-mono pt-2">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-primary" /> 100% Unbleached Grain
-          </span>
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-primary" /> 36-Hr Wild Ferment
-          </span>
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-primary" /> Zero Synthetic Dough Conditioners
-          </span>
+
+        {/* Provenance Stat Strip */}
+        <div className="rounded-2xl border border-border/70 bg-surface-container-low/60 p-6 flex flex-wrap items-center justify-around gap-6 text-center">
+          <div className="space-y-1">
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-primary">100%</span>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Stone-Ground Heritage Grain
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border/80 hidden sm:block" />
+          <div className="space-y-1">
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-primary">&lt; 35°C</span>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Cold Burr Mill Temp
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border/80 hidden sm:block" />
+          <div className="space-y-1">
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-primary">36 Hrs</span>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Slow Cold Fermentation
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border/80 hidden sm:block" />
+          <div className="space-y-1">
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-primary">0%</span>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Bleach, Bromate, or Additives
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. BAKEHOUSE NOTE FROM HEAD BAKER */}
+      <section id="bakers-note" className="scroll-mt-20 space-y-8">
+        <div className="rounded-2xl border border-border/80 bg-gradient-to-br from-card via-surface-container-low/50 to-card p-8 sm:p-12 shadow-sm space-y-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-border/70">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <Badge variant="warning" dot={true} className="text-[11px] font-semibold">
+                  From the Hearthstone
+                </Badge>
+                <span className="font-mono text-xs text-muted-foreground">
+                  Julian Hayes · Head Baker &amp; Founder
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+                A Note from the Bakehouse Hearth
+              </h2>
+              <p className="text-xs sm:text-sm text-secondary-foreground">
+                Reflections on slow baking, living levain, and how to honor the loaf in your home.
+              </p>
+            </div>
+
+            {/* Baker Seal Avatar */}
+            <div className="flex items-center gap-3 p-2 bg-background/80 rounded-xl border border-border/70 self-start sm:self-auto">
+              <div className="w-10 h-10 rounded-lg bg-primary text-primary-foreground font-serif font-bold text-sm flex items-center justify-center shrink-0">
+                JH
+              </div>
+              <div className="text-left text-xs">
+                <p className="font-semibold text-foreground">Julian Hayes</p>
+                <p className="text-[10px] text-muted-foreground font-mono">Head Baker · Orchard Lane</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Letter Body */}
+          <div className="prose prose-stone max-w-none text-secondary-foreground space-y-4 text-xs sm:text-sm sm:leading-relaxed font-sans">
+            <p>
+              Every Thursday night as the orchard outside cools down, our bakehouse begins to stir. The levain has reached peak activity—airy, fragrant with green apple and wild floral acidity, and ready to be gently folded into freshly milled Cairnspring wheat.
+            </p>
+            <p>
+              By 4:00 AM Friday, the volcanic stone hearth is roaring at 240°C. Each loaf is turned out of its willow banneton, hand-scored with a curved lame, and loaded directly onto the stone with a burst of steam. What emerges an hour later is bread in its oldest and truest form: dark mahogany blisters, deeply caramelized ear, and a tender, custardy crumb that stays moist for days.
+            </p>
+            <p>
+              Because we bake strictly to order, the loaf in your reserved cubby was pulled from the stone just hours before your pickup window. Here is how we recommend caring for it once you take it home:
+            </p>
+          </div>
+
+          {/* Baker's Care Ritual - 3 Tips */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div className="rounded-xl border border-border/70 bg-card p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                <Clock className="w-4 h-4 text-primary shrink-0" />
+                <span>1. Let It Settle First</span>
+              </div>
+              <p className="text-xs text-secondary-foreground leading-relaxed">
+                Resist cutting into your loaf while warm from the locker. Sourdough completes its internal gelatinization as it cools. Wait 90 minutes for the crumb to set into clean, chewy slices.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                <Utensils className="w-4 h-4 text-primary shrink-0" />
+                <span>2. Breathable Storage Only</span>
+              </div>
+              <p className="text-xs text-secondary-foreground leading-relaxed">
+                Store your cut loaf face-down on a wooden butcher block or wrapped in our breathable linen bag. Never store in plastic or the refrigerator, which speeds starch retrogradation and ruins the crust.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                <Flame className="w-4 h-4 text-primary shrink-0" />
+                <span>3. Revive the Crust</span>
+              </div>
+              <p className="text-xs text-secondary-foreground leading-relaxed">
+                On days 3 through 5, splash the whole loaf or slice with a mist of cold water and bake at 200°C (400°F) for 6–8 minutes. The blistered crust will instantly crackle like fresh from the hearth.
+              </p>
+            </div>
+          </div>
+
+          {/* Baker Sign-off */}
+          <div className="pt-4 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div>
+              <p className="font-serif text-sm font-semibold text-foreground italic">
+                “Eat with salted butter, good olive oil, or simply tear with your hands.”
+              </p>
+              <p className="text-muted-foreground mt-0.5">
+                — Julian &amp; the Crumb &amp; Bloom Hearth Team
+              </p>
+            </div>
+
+            <Link to="/products">
+              <Button size="sm" className="gap-2 font-semibold">
+                <span>Reserve Batch #84 Loaves</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

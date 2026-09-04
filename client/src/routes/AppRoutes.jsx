@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 // Layouts
 import PublicLayout from '@/layouts/PublicLayout';
 import AppLayout from '@/layouts/AppLayout';
+import ProtectedRoute from '@/routes/ProtectedRoute';
 
 // Customer Pages (Developer A)
 import HomePage from '@/pages/HomePage';
@@ -42,7 +43,14 @@ export default function AppRoutes() {
       </Route>
 
       {/* Staff Operations Shell Layout */}
-      <Route path="/app" element={<AppLayout />}>
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<OwnerProductsPage />} />

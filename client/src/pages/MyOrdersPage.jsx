@@ -11,7 +11,9 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
-import { getAllOrders } from '@/features/orders/services/orderMockData';
+import { Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { orderService } from '@/features/orders/services/orderService';
 import { MOCK_PRODUCTS } from '@/features/products/services/productMockData';
 import { useCart } from '@/features/cart/hooks/useCart';
 import CustomerOrderCard from '@/features/orders/components/CustomerOrderCard';
@@ -23,17 +25,26 @@ export default function MyOrdersPage() {
   const [reorderStatus, setReorderStatus] = useState(null); // { successCount, skipped: [] }
   const { addToCart, openCart } = useCart();
 
-  const allOrders = useMemo(() => getAllOrders(), []);
+  const {
+    data: allOrders = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => orderService.getOrders(),
+    staleTime: 1000 * 15,
+  });
 
   const activeOrders = useMemo(() => {
     return allOrders.filter(
-      (o) => o.isActive !== false && o.status !== 'Fulfilled' && o.status !== 'Cancelled'
+      (o) => o.isActive !== false && o.status !== 'Completed' && o.status !== 'Cancelled'
     );
   }, [allOrders]);
 
   const pastOrders = useMemo(() => {
     return allOrders.filter(
-      (o) => o.isActive === false || o.status === 'Fulfilled' || o.status === 'Cancelled'
+      (o) => o.isActive === false || o.status === 'Completed' || o.status === 'Cancelled'
     );
   }, [allOrders]);
 
@@ -186,8 +197,13 @@ export default function MyOrdersPage() {
         </button>
       </div>
 
-      {/* 5. Orders List or Empty State */}
-      {displayedOrders.length === 0 ? (
+      {/* 5. Orders List, Loading, or Empty State */}
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground font-mono">Fetching your reservation ledger...</p>
+        </div>
+      ) : displayedOrders.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-12 sm:p-16 text-center space-y-4 max-w-lg mx-auto my-6">
           <div className="w-14 h-14 rounded-full bg-secondary text-primary mx-auto flex items-center justify-center">
             {activeTab === 'active' ? (

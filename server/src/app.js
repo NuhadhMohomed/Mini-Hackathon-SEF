@@ -4,6 +4,10 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import healthRouter from './routes/health.js';
+import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import inventoryRoutes from './routes/inventoryRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -27,6 +31,10 @@ app.use(cookieParser());
 
 // Base Infrastructure Routes
 app.use('/api/health', healthRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Error Handling Middleware
 app.use(notFoundHandler);

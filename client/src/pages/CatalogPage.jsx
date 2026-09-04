@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
-import {
-  MOCK_PRODUCTS,
-  PRODUCT_CATEGORIES,
-} from '@/features/products/services/productMockData';
+import { useQuery } from '@tanstack/react-query';
+import { Flame, Clock, ShieldCheck, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { PRODUCT_CATEGORIES } from '@/features/products/services/productMockData';
+import { productService } from '@/features/products/services/productService';
 import ProductFilters from '@/features/products/components/ProductFilters';
 import ProductGrid from '@/features/products/components/ProductGrid';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function CatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -15,9 +15,22 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter and sort products
+  // Fetch live products from backend via TanStack React Query
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => productService.getProducts(),
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+
+  // Filter and sort live products
   const filteredProducts = useMemo(() => {
-    let result = [...MOCK_PRODUCTS];
+    let result = [...products];
 
     // 1. Category filter
     if (selectedCategory !== 'all') {
@@ -50,7 +63,6 @@ export default function CatalogPage() {
       result.sort((a, b) => {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
-        // Then prioritize in-stock
         const aStock = a.available && a.remainingAllotment > 0 ? 1 : 0;
         const bStock = b.available && b.remainingAllotment > 0 ? 1 : 0;
         return bStock - aStock;
@@ -58,18 +70,13 @@ export default function CatalogPage() {
     }
 
     return result;
-  }, [selectedCategory, availabilityFilter, searchQuery, sortBy]);
+  }, [products, selectedCategory, availabilityFilter, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setSelectedCategory('all');
     setAvailabilityFilter('all');
     setSortBy('featured');
     setSearchQuery('');
-  };
-
-  const handleAddToCart = (product) => {
-    // Visual feedback placeholder (Cart state will be implemented in the Cart phase)
-    console.log('Product selected for cart:', product.name);
   };
 
   return (
@@ -134,12 +141,27 @@ export default function CatalogPage() {
         totalResults={filteredProducts.length}
       />
 
-      {/* 3. Product Catalog Grid */}
-      <ProductGrid
-        products={filteredProducts}
-        onAddToCart={handleAddToCart}
-        onResetFilters={handleResetFilters}
-      />
+      {/* 3. Loading, Error, and Results States */}
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground font-mono">Loading fresh hearth offerings...</p>
+        </div>
+      ) : isError ? (
+        <div className="py-12 max-w-md mx-auto text-center space-y-4 bg-destructive/10 p-6 rounded-xl border border-destructive/20">
+          <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+          <p className="text-sm text-foreground">Could not load hearth offerings.</p>
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            Try Again
+          </Button>
+        </div>
+      ) : (
+        <ProductGrid
+          products={filteredProducts}
+          onAddToCart={() => {}}
+          onResetFilters={handleResetFilters}
+        />
+      )}
     </div>
   );
 }

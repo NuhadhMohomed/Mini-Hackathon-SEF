@@ -19,7 +19,7 @@ import CheckoutReview from '@/features/checkout/components/CheckoutReview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { saveCreatedOrder } from '@/features/orders/services/orderMockData';
+import { orderService } from '@/features/orders/services/orderService';
 
 export default function CheckoutPage() {
   const { items, itemCount, subtotal, packagingFee, total, clearCart } = useCart();
@@ -81,53 +81,30 @@ export default function CheckoutPage() {
     setCurrentStep(3);
   };
 
-  const handleConfirmReservation = () => {
+  const handleConfirmReservation = async () => {
     setIsProcessing(true);
 
-    // Simulate mock order reservation allocation
-    setTimeout(() => {
-      const randomId = Math.floor(1026 + Math.random() * 900);
-      const orderNumber = `#ORD-${randomId}`;
-      const pickupPin = Math.floor(1000 + Math.random() * 9000).toString();
-      const cubbyNumber = `Porch Cubby ${String.fromCharCode(65 + Math.floor(Math.random() * 4))}-${Math.floor(1 + Math.random() * 8)}`;
-
-      const newOrder = {
-        id: `ORD-${randomId}`,
-        orderNumber,
-        createdAt: new Date().toISOString(),
-        displayDate: 'Nov 14, 2026',
-        status: 'Ready for Porch',
-        statusVariant: 'success',
-        isActive: true,
-        type: 'active',
-        pickupSlot: `${selectedSlot?.day || 'Friday Nov 15'} · ${selectedSlot?.timeWindow || '08:30 AM – 09:30 AM'}`,
-        pickupLocation: 'Crumb & Bloom Porchside Locker, 42 Orchard Lane',
-        pickupCode: `CRUMB-${pickupPin}`,
-        cubbyNumber,
-        accessPin: pickupPin,
-        customer: {
-          name: contactData.fullName,
-          phone: contactData.phone,
-          email: contactData.email || '',
-          smsAlerts: true,
-        },
-        items: [...items],
-        subtotal,
-        packagingFee,
-        total,
-        notes: contactData.notes || '',
-      };
-
-      // Persist order in mock storage
-      saveCreatedOrder(newOrder);
+    try {
+      const newOrder = await orderService.createOrder({
+        customer: contactData,
+        items,
+        pickupSlot: selectedSlot?.timeWindow
+          ? `${selectedSlot?.day || 'Friday Nov 15'} • ${selectedSlot?.timeWindow}`
+          : 'Friday Nov 15 • 08:30 - 09:30 AM',
+      });
 
       // Clear shopping basket
       clearCart();
       setIsProcessing(false);
 
       // Navigate directly to dedicated Order Confirmation & Pickup Pass view
-      navigate(`/order-confirmation/${newOrder.id}`);
-    }, 1200);
+      const targetId = newOrder.orderId || newOrder.id || newOrder._id;
+      navigate(`/order-confirmation/${targetId}`);
+    } catch (error) {
+      console.error('Failed to create order on backend:', error);
+      alert(error.message || 'Failed to submit order. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   // If order was just confirmed, render artisan pickup pass confirmation view

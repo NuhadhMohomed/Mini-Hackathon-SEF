@@ -12,8 +12,10 @@ import {
   Phone,
   HelpCircle,
   Share2,
+  Loader2,
 } from 'lucide-react';
-import { getOrderById } from '@/features/orders/services/orderMockData';
+import { useQuery } from '@tanstack/react-query';
+import { orderService } from '@/features/orders/services/orderService';
 import PickupPass from '@/features/orders/components/PickupPass';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,12 +23,28 @@ import { Badge } from '@/components/ui/badge';
 
 export default function OrderConfirmationPage() {
   const { id } = useParams();
-  const order = getOrderById(id);
+  const {
+    data: order,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => orderService.getOrderById(id),
+  });
 
   const [calendarAdded, setCalendarAdded] = useState(false);
 
+  if (isLoading) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground font-mono">Generating your digital pickup pass from the hearth...</p>
+      </div>
+    );
+  }
+
   // 1. Order Not Found State (Graceful fallback)
-  if (!order) {
+  if (!order || isError) {
     return (
       <div className="py-16 max-w-lg mx-auto text-center space-y-6">
         <div className="w-16 h-16 rounded-full bg-secondary text-primary mx-auto flex items-center justify-center">

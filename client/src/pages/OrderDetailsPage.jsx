@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Phone, MapPin, ShieldCheck, Printer } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, ShieldCheck, Printer, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,26 +10,37 @@ import ReadinessSummaryBanner from '@/features/readiness/components/ReadinessSum
 import ReadinessTable from '@/features/readiness/components/ReadinessTable';
 import BagTagPrintModal from '@/features/staff-orders/components/BagTagPrintModal';
 import { calculateOrderReadiness } from '@/features/readiness/services/readinessCalculator';
-import { initialStaffOrdersData } from '@/features/staff-orders/services/staffOrderMockService';
-import { initialInventoryItems } from '@/features/inventory/services/inventoryMockData';
+import { orderService } from '@/features/orders/services/orderService';
+import { inventoryService } from '@/features/inventory/services/inventoryService';
 
 const WORKFLOW_STAGES = ['Pending', 'Processing', 'Ready', 'Completed'];
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
-  const [orders, setOrders] = useState(initialStaffOrdersData);
-  const [inventory] = useState(initialInventoryItems);
+  const queryClient = useQueryClient();
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [showReadiness, setShowReadiness] = useState(true);
 
-  const order = orders.find((o) => o.id === id) || orders[0];
+  const { data: order, isLoading: isOrderLoading } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => orderService.getOrderById(id),
+  });
 
-  const readinessResult = calculateOrderReadiness(order.items, inventory);
+  const { data: inventory = [] } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => inventoryService.getInventory(),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: (newStatus) => orderService.updateOrderStatus(order?.orderId || order?.id || id, newStatus),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
 
   const handleUpdateStatus = (newStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o))
-    );
+    updateStatusMutation.mutate(newStatus);
   };
 
   const getStatusType = (status) => {
@@ -40,6 +52,21 @@ export default function OrderDetailsPage() {
       default: return 'pending';
     }
   };
+
+  if (isOrderLoading || !order) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground font-mono">Loading order details...</p>
+      </div>
+    );
+  }
+
+  const customerName = order.customerName || (typeof order.customer === 'string' ? order.customer : order.customer?.name) || 'Patron';
+  const customerPhone = order.phone || order.customer?.phone || '+1 (555) 234-5678';
+  const customerAddress = order.deliveryAddress || order.customer?.address || '42 Orchard Lane Porchside Locker';
+  const orderItems = order.items || [];
+  const readinessResult = calculateOrderReadiness(orderItems, inventory);
 
   return (
     <div className="space-y-6">
@@ -53,8 +80,8 @@ export default function OrderDetailsPage() {
       </div>
 
       <PageHeader
-        title={`Order Details #${order.id}`}
-        subtitle={`Customer: ${order.customer}`}
+        title={`Order Details #${order.orderId || order.id}`}
+        subtitle={`Customer: ${customerName}`}
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -74,7 +101,7 @@ export default function OrderDetailsPage() {
       {/* 1. Workflow Progression Buttons */}
       <Card tactile className="p-4 space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-sans">
-          Order Status Progression
+          Order Status Progression (Live Database Persistence)
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {WORKFLOW_STAGES.map((st) => {
@@ -84,7 +111,8 @@ export default function OrderDetailsPage() {
                 key={st}
                 type="button"
                 onClick={() => handleUpdateStatus(st)}
-                className={`p-2.5 rounded-lg border text-xs font-semibold transition-all text-center ${
+                disabled={updateStatusMutation.isPending}
+                className={`p-2.5 rounded-lg border text-xs font-semibold transition-all text-center cursor-pointer ${
                   isCurrent
                     ? 'bg-primary text-primary-foreground border-primary shadow-xs'
                     : 'bg-surface-container-low border-border text-secondary-foreground hover:bg-surface-container'
@@ -106,15 +134,15 @@ export default function OrderDetailsPage() {
           <div className="space-y-2 text-xs">
             <div>
               <span className="text-muted-foreground block">Customer Name</span>
-              <span className="font-semibold text-foreground text-sm">{order.customer}</span>
+              <span className="font-semibold text-foreground text-sm">{customerName}</span>
             </div>
             <div className="flex items-center gap-2 text-secondary-foreground">
               <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
-              <span>{order.phone || '+1 (555) 234-5678'}</span>
+              <span>{customerPhone}</span>
             </div>
             <div className="flex items-start gap-2 text-secondary-foreground">
               <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-              <span>{order.deliveryAddress || '142 Baker Street, Porch Locker #04'}</span>
+              <span>{customerAddress}</span>
             </div>
           </div>
         </Card>
@@ -122,19 +150,19 @@ export default function OrderDetailsPage() {
         <Card tactile className="p-4 space-y-3 md:col-span-2">
           <h3 className="font-serif text-base font-semibold text-foreground border-b border-border pb-2 flex justify-between">
             <span>Ordered Products</span>
-            <span className="font-mono text-primary font-bold">Total: ${order.total.toFixed(2)}</span>
+            <span className="font-mono text-primary font-bold">Total: ${(Number(order.total) || 0).toFixed(2)}</span>
           </h3>
           <ul className="divide-y divide-border text-xs">
-            {order.items.map((item, idx) => (
+            {orderItems.map((item, idx) => (
               <li key={idx} className="py-2.5 flex justify-between items-center">
                 <div>
                   <span className="font-semibold text-foreground">{item.name}</span>
                   <span className="text-muted-foreground block">
-                    Quantity: {item.qty} x ${(item.price || item.unitPrice || 0).toFixed(2)}
+                    Quantity: {item.qty || item.quantity} x ${(item.price || item.unitPrice || 0).toFixed(2)}
                   </span>
                 </div>
                 <span className="font-mono font-semibold text-foreground">
-                  ${(item.qty * (item.price || item.unitPrice || 0)).toFixed(2)}
+                  ${((item.qty || item.quantity) * (item.price || item.unitPrice || 0)).toFixed(2)}
                 </span>
               </li>
             ))}
@@ -175,14 +203,14 @@ export default function OrderDetailsPage() {
         open={printModalOpen}
         onOpenChange={setPrintModalOpen}
         order={{
-          id: order.id,
-          customerName: order.customer,
-          phone: order.phone || '+1 (555) 234-5678',
-          porchLocker: 'Porch Locker #04',
+          id: order.orderId || order.id,
+          customerName,
+          phone: customerPhone,
+          porchLocker: order.cubbyNumber || 'Porch Locker #04',
           pickupSlot: order.pickupSlot || 'Friday 08:00 AM',
-          items: order.items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.price || 12.0 })),
+          items: orderItems.map((i) => ({ name: i.name, qty: i.qty || i.quantity, unitPrice: i.price || 12.0 })),
           totalAmount: order.total,
-          orderDate: '2026-09-04',
+          orderDate: order.displayDate || '2026-09-04',
         }}
       />
     </div>

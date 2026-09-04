@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Package, Flame, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Package, Flame, AlertTriangle, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ReadinessSummaryBanner from '@/features/readiness/components/ReadinessSummaryBanner';
 import ReadinessTable from '@/features/readiness/components/ReadinessTable';
 import { calculateOrderReadiness } from '@/features/readiness/services/readinessCalculator';
-import { initialStaffOrdersData } from '@/features/staff-orders/services/staffOrderMockService';
-import { initialLarderInventory } from '@/features/inventory/services/inventoryMockService';
+import { orderService } from '@/features/orders/services/orderService';
+import { inventoryService } from '@/features/inventory/services/inventoryService';
 
 export default function ReadinessPage() {
   const [selectedOrderId, setSelectedOrderId] = useState('ALL');
-  const [inventory] = useState(initialLarderInventory);
 
-  // Aggregate items across all pending/processing orders or pick specific order
-  const activeOrders = initialStaffOrdersData.filter(
+  const { data: orders = [], isLoading: isOrdersLoading } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => orderService.getOrders(),
+  });
+
+  const { data: inventory = [], isLoading: isInventoryLoading } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => inventoryService.getInventory(),
+  });
+
+  // Aggregate items across all pending/processing/ready orders or pick specific order
+  const activeOrders = orders.filter(
     (o) => o.status === 'Pending' || o.status === 'Processing' || o.status === 'Ready'
   );
 
@@ -23,19 +33,21 @@ export default function ReadinessPage() {
     // Combine all active orders
     const combined = [];
     activeOrders.forEach((o) => {
-      o.items.forEach((item) => {
-        const existing = combined.find((c) => c.name === item.name);
+      (o.items || []).forEach((item) => {
+        const itemName = item.name || '';
+        const itemQty = item.qty || item.quantity || 1;
+        const existing = combined.find((c) => c.name.toLowerCase() === itemName.toLowerCase());
         if (existing) {
-          existing.qty += item.qty;
+          existing.qty += itemQty;
         } else {
-          combined.push({ ...item });
+          combined.push({ ...item, qty: itemQty });
         }
       });
     });
     itemsToAudit = combined;
   } else {
-    const found = initialStaffOrdersData.find((o) => o.id === selectedOrderId);
-    itemsToAudit = found ? found.items : [];
+    const found = orders.find((o) => o.id === selectedOrderId || o.orderId === selectedOrderId);
+    itemsToAudit = (found?.items || []).map((i) => ({ ...i, qty: i.qty || i.quantity || 1 }));
   }
 
   const readinessResult = calculateOrderReadiness(itemsToAudit, inventory);
@@ -44,7 +56,7 @@ export default function ReadinessPage() {
     <div className="space-y-6">
       <PageHeader
         title="Ingredient Readiness Engine"
-        subtitle="Batch audit grain, dairy, and botanical requirements against live larder stock before firing the hearth."
+        subtitle="Batch audit grain, dairy, and botanical requirements against live larder stock in the bakery database."
         breadcrumbs={[
           { label: 'Bakehouse Hub', href: '/app' },
           { label: 'Readiness Engine' },
@@ -62,7 +74,7 @@ export default function ReadinessPage() {
           <button
             type="button"
             onClick={() => setSelectedOrderId('ALL')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               selectedOrderId === 'ALL'
                 ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'bg-surface-container text-secondary-foreground hover:bg-surface-container-high'
@@ -73,29 +85,38 @@ export default function ReadinessPage() {
 
           {activeOrders.map((ord) => (
             <button
-              key={ord.id}
+              key={ord.id || ord.orderId}
               type="button"
-              onClick={() => setSelectedOrderId(ord.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold whitespace-nowrap transition-colors ${
-                selectedOrderId === ord.id
+              onClick={() => setSelectedOrderId(ord.id || ord.orderId)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                selectedOrderId === (ord.id || ord.orderId)
                   ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'bg-surface-container text-secondary-foreground hover:bg-surface-container-high'
               }`}
             >
-              #{ord.id}
+              #{ord.orderId || ord.id}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Readiness Summary Banner */}
-      <ReadinessSummaryBanner
-        isReady={readinessResult.isReady}
-        deficitCount={readinessResult.deficitCount}
-      />
+      {isOrdersLoading || isInventoryLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground font-mono">Running ingredient deficit audit...</p>
+        </div>
+      ) : (
+        <>
+          {/* Readiness Summary Banner */}
+          <ReadinessSummaryBanner
+            isReady={readinessResult.isReady}
+            deficitCount={readinessResult.deficitCount}
+          />
 
-      {/* Audit Detail Breakdown */}
-      <ReadinessTable auditRows={readinessResult.auditRows} />
+          {/* Audit Detail Breakdown */}
+          <ReadinessTable auditRows={readinessResult.auditRows} />
+        </>
+      )}
     </div>
   );
 }

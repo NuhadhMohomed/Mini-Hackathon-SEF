@@ -13,18 +13,28 @@ import {
   Sparkles,
   Info,
 } from 'lucide-react';
-import { MOCK_PRODUCTS } from '@/features/products/services/productMockData';
+import { useQuery } from '@tanstack/react-query';
+import { productService } from '@/features/products/services/productService';
 import QuantityControl from '@/components/common/QuantityControl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/features/cart/hooks/useCart';
+import { Loader2 } from 'lucide-react';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
   const { addToCart, openCart } = useCart();
+
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productService.getProductById(id),
+  });
 
   const [quantity, setQuantity] = useState(1);
   const [addedNotice, setAddedNotice] = useState(false);
@@ -35,8 +45,17 @@ export default function ProductDetailsPage() {
     setAddedNotice(false);
   }, [id]);
 
+  if (isLoading) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground font-mono">Loading loaf specifications from the hearth...</p>
+      </div>
+    );
+  }
+
   // 1. Invalid Product State (Graceful fallback)
-  if (!product) {
+  if (!product || isError) {
     return (
       <div className="py-16 max-w-lg mx-auto text-center space-y-6">
         <div className="w-16 h-16 rounded-full bg-secondary text-primary mx-auto flex items-center justify-center">
