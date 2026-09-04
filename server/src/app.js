@@ -45,6 +45,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Root API Welcome / Status
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'SE3090 Mini Hackathon Backend API is active',
+    health: '/api/health',
+    endpoints: {
+      auth: '/api/auth',
+      products: '/api/products',
+      orders: '/api/orders',
+      inventory: '/api/inventory'
+    }
+  });
+});
+
 // Base Infrastructure Routes
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRoutes);
