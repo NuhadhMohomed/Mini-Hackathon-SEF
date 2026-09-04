@@ -5,7 +5,7 @@ import { Routes, Route } from 'react-router-dom';
 import PublicLayout from '@/layouts/PublicLayout';
 import AppLayout from '@/layouts/AppLayout';
 
-// Pages
+// Customer Pages (Developer A)
 import HomePage from '@/pages/HomePage';
 import CatalogPage from '@/pages/CatalogPage';
 import ProductDetailsPage from '@/pages/ProductDetailsPage';
@@ -15,13 +15,20 @@ import OrderConfirmationPage from '@/pages/OrderConfirmationPage';
 import MyOrdersPage from '@/pages/MyOrdersPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import AppPlaceholderPage from '@/pages/AppPlaceholderPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+
+// Staff Operations Pages (Developer B)
+import DashboardPage from '@/pages/DashboardPage';
+import OwnerProductsPage from '@/pages/OwnerProductsPage';
+import ManageOrdersPage from '@/pages/ManageOrdersPage';
+import OrderDetailsPage from '@/pages/OrderDetailsPage';
+import InventoryPage from '@/pages/InventoryPage';
+import ReadinessPage from '@/pages/ReadinessPage';
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public Pages Layout */}
+      {/* Public Customer Pages Layout */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<CatalogPage />} />
@@ -34,9 +41,15 @@ export default function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      {/* Protected Application Shell Layout */}
+      {/* Staff Operations Shell Layout */}
       <Route path="/app" element={<AppLayout />}>
-        <Route index element={<AppPlaceholderPage />} />
+        <Route index element={<DashboardPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="products" element={<OwnerProductsPage />} />
+        <Route path="orders" element={<ManageOrdersPage />} />
+        <Route path="orders/:id" element={<OrderDetailsPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="readiness" element={<ReadinessPage />} />
       </Route>
 
       {/* 404 / Catch-all Route */}

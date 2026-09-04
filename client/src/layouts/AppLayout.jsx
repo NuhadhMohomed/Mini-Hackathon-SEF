@@ -100,19 +100,19 @@ export default function AppLayout() {
             </Badge>
           </NavLink>
 
-          <a
-            href="#schedule"
-            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-secondary-foreground hover:text-foreground hover:bg-surface-container font-medium transition-colors"
+          <NavLink
+            to="/app/readiness"
+            className={getNavLinkClass}
             onClick={() => setMobileSidebarOpen(false)}
           >
             <div className="flex items-center gap-3">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span>Bake Schedule</span>
+              <Calendar className="w-4 h-4 text-primary" />
+              <span>Readiness</span>
             </div>
             <span className="font-mono text-[11px] text-success bg-success-bg px-1.5 py-0.5 rounded font-semibold">
-              Fri Drop
+              Audit
             </span>
-          </a>
+          </NavLink>
         </nav>
       </div>
 

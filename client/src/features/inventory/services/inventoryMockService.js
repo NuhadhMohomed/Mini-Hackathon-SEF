@@ -60,3 +60,6 @@ export const initialLarderInventory = [
 export const inventoryMockService = {
   getInventory: () => initialLarderInventory,
 };
+
+export const initialInventoryItems = initialLarderInventory;
+

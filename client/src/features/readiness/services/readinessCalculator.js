@@ -77,3 +77,20 @@ export function calculateIngredientReadiness(order = {}, inventory = []) {
     };
   });
 }
+
+/**
+ * Calculates order readiness summary and audit rows.
+ * Accepts either an items array or an order object.
+ */
+export function calculateOrderReadiness(itemsOrOrder, inventory = []) {
+  const items = Array.isArray(itemsOrOrder) ? itemsOrOrder : (itemsOrOrder?.items || []);
+  const auditRows = calculateIngredientReadiness({ items }, inventory);
+  const deficits = auditRows.filter((r) => r.status === 'Insufficient');
+  return {
+    auditRows,
+    isReady: deficits.length === 0,
+    deficitCount: deficits.length,
+    insufficientCount: deficits.length,
+  };
+}
+
