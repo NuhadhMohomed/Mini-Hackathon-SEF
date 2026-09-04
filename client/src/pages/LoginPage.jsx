@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { api, setAuthSession } from '@/lib/api';
-import { Flame, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -54,12 +54,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleFillDemoOwner = () => {
-    setEmail('owner@crumbandbloom.com');
-    setPassword('Hearth2026!');
-    setErrorMessage('');
-  };
-
   return (
     <div className="max-w-md mx-auto py-8 px-4">
       <Card className="border-border shadow-md">
@@ -106,7 +100,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="owner@crumbandbloom.com"
+                placeholder="you@example.com"
                 required
                 autoComplete="email"
               />
@@ -131,18 +125,6 @@ export default function LoginPage() {
               {isLoading ? 'Authenticating...' : 'Sign In'}
             </Button>
           </form>
-
-          {/* Demo Quick Login Helper */}
-          <div className="pt-2 border-t border-border">
-            <button
-              type="button"
-              onClick={handleFillDemoOwner}
-              className="w-full py-2 px-3 bg-secondary/50 hover:bg-secondary border border-border rounded-lg text-xs text-primary font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Flame className="w-3.5 h-3.5 text-primary" />
-              <span>Fill Head Baker Credentials (Julian Hayes)</span>
-            </button>
-          </div>
         </CardContent>
 
         <CardFooter className="flex flex-col gap-2 border-t pt-4 text-xs text-muted-foreground text-center">
