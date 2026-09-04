@@ -4,48 +4,106 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm unbleached flour canvas (#FCF9F4) */
+    --background: 38 45% 97%;
+    /* Roasted espresso text (#1C1C19) */
+    --foreground: 60 6% 11%;
+
+    /* Crisp hearth white elevated cards (#FFFFFF) */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 60 6% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --popover-foreground: 60 6% 11%;
+
+    /* Warm terracotta primary (#C05621) */
+    --primary: 20 71% 44%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 22 92% 33%; /* #9F3E07 */
+
+    /* Oatmeal secondary (#F0EDE9 / #5C4D44) */
+    --secondary: 34 17% 93%;
+    --secondary-foreground: 22 15% 31%;
+
+    /* Milled rye dust / subtle tones (#F6F3EE / #8C7B70) */
+    --muted: 38 27% 95%;
+    --muted-foreground: 24 11% 49%;
+
+    /* Accent */
+    --accent: 38 27% 95%;
+    --accent-foreground: 20 71% 44%;
+
+    /* Semantic: Destructive / Rust Red (#BA1A1A) */
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-bg: 0 82% 95%; /* #FDE8E8 */
+    --destructive-text: 0 63% 31%; /* #7F1D1D */
+
+    /* Hairline borders & Strong outlines */
+    --border: 35 25% 87%; /* #E6DFD5 (border-subtle) */
+    --input: 33 21% 81%; /* #D8CFC4 (border-strong) */
+    --ring: 20 71% 44%; /* #C05621 */
     --radius: 0.5rem;
+
+    /* Crumb & Bloom Surface Layer Tokens */
+    --surface: 38 45% 97%; /* #FCF9F4 */
+    --surface-container-lowest: 0 0% 100%; /* #FFFFFF */
+    --surface-container-low: 38 27% 95%; /* #F6F3EE */
+    --surface-container: 34 17% 93%; /* #F0EDE9 */
+    --surface-container-high: 38 14% 91%; /* #EBE8E3 */
+
+    /* Semantic: Rosemary Green Success (#4A6B53) */
+    --success: 136 18% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-bg: 130 18% 92%; /* #E8EFE9 */
+    --success-text: 133 22% 23%; /* #2D4733 */
+
+    /* Semantic: Caramel Amber Warning (#D97706) */
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 100%;
+    --warning-bg: 37 93% 94%; /* #FEF3E2 */
+    --warning-text: 32 100% 27%; /* #8A4A00 */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --background: 20 19% 12%; /* #261E1A */
+    --foreground: 38 45% 97%; /* #FCF9F4 */
+    --card: 20 18% 15%; /* #2E2520 */
+    --card-foreground: 38 45% 97%;
+    --popover: 20 18% 15%;
+    --popover-foreground: 38 45% 97%;
+    --primary: 20 75% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 20 75% 50%;
+    --secondary: 20 15% 20%;
+    --secondary-foreground: 38 35% 90%;
+    --muted: 20 15% 20%;
+    --muted-foreground: 24 12% 65%;
+    --accent: 20 15% 22%;
+    --accent-foreground: 20 75% 55%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-bg: 0 45% 20%;
+    --destructive-text: 0 70% 85%;
+    --border: 20 15% 25%;
+    --input: 20 15% 28%;
+    --ring: 20 75% 55%;
+
+    --surface: 20 19% 12%;
+    --surface-container-lowest: 20 18% 15%;
+    --surface-container-low: 20 18% 17%;
+    --surface-container: 20 16% 20%;
+    --surface-container-high: 20 15% 24%;
+
+    --success: 136 25% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-bg: 136 30% 20%;
+    --success-text: 136 40% 85%;
+
+    --warning: 32 90% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-bg: 32 40% 20%;
+    --warning-text: 32 90% 85%;
   }
 }
 
@@ -54,7 +112,18 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Tactile shadow utility from DESIGN.md */
+.tactile-card {
+  box-shadow: 0 1px 2px 0 rgba(44, 34, 30, 0.04), 0 0 0 1px hsl(var(--border));
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tactile-card:hover {
+  box-shadow: 0 4px 14px -2px rgba(44, 34, 30, 0.09), 0 0 0 1px hsl(var(--input));
+  transform: translateY(-2px);
 }
