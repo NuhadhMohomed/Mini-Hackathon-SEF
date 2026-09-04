@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.json());
 // Mount domain-specific RESTful API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes)
+app.use('/api/orders', orderRoutes);
 
 // Root health-check endpoint
 app.get('/', (req, res) => {
