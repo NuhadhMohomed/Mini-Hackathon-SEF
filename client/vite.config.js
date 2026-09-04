@@ -15,10 +15,11 @@ export default defineConfig({
     }
   },
   server: {
+    // Local dev: proxy /api requests to the backend dev server
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:5000',
         changeOrigin: true
       }
     }

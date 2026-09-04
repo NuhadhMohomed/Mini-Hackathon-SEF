@@ -13,13 +13,29 @@ import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 dotenv.config();
 
 const app = express();
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-// Standard Middleware
+// Allow multiple origins: local dev + Vercel production URL
+// Set CLIENT_URL on Railway to your Vercel app URL
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(morgan('dev'));
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, Postman, mobile apps)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      // Also allow any *.vercel.app subdomain as a safe default
+      if (/\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
