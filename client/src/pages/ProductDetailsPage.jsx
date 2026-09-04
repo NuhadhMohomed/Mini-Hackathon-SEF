@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -28,6 +28,12 @@ export default function ProductDetailsPage() {
 
   const [quantity, setQuantity] = useState(1);
   const [addedNotice, setAddedNotice] = useState(false);
+
+  // Reset state when switching between products
+  useEffect(() => {
+    setQuantity(1);
+    setAddedNotice(false);
+  }, [id]);
 
   // 1. Invalid Product State (Graceful fallback)
   if (!product) {
