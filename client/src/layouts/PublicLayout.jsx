@@ -31,13 +31,13 @@ function PublicLayoutContent() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              href="#drop-status"
+            <Link
+              to="/products"
               className="text-xs text-primary hover:underline font-semibold hidden sm:inline-flex items-center gap-1"
             >
               <span>View Batch Status</span>
               <ArrowUpRight className="w-3 h-3" />
-            </a>
+            </Link>
           </div>
         </div>
       </aside>
@@ -82,10 +82,11 @@ function PublicLayoutContent() {
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Account / Login Trigger */}
+            {/* Account / Orders Trigger */}
             <Link
-              to="/login"
-              aria-label="Customer account portal"
+              to="/my-orders"
+              aria-label="Customer orders and passes"
+              title="My Orders & Passes"
               className="p-2 text-secondary-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors duration-150"
             >
               <User className="w-5 h-5" />
@@ -159,6 +160,14 @@ function PublicLayoutContent() {
                   {itemCount} · ${subtotal.toFixed(2)}
                 </span>
               </button>
+              <NavLink
+                to="/my-orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors min-h-[44px] flex items-center justify-between"
+              >
+                <span>My Orders &amp; Passes</span>
+                <span className="font-mono text-xs text-primary font-semibold">Ledger</span>
+              </NavLink>
               <NavLink
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}

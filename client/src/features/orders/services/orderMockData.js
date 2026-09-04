@@ -194,3 +194,68 @@ export const MOCK_ORDERS = [
     notes: '',
   },
 ];
+
+/**
+ * Find order by ID from session storage or static mock orders
+ */
+export function getOrderById(id) {
+  if (!id) return null;
+
+  // 1. Check if order was freshly created in session
+  try {
+    const saved = sessionStorage.getItem('crumb_bloom_latest_order');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (
+        parsed.id?.toLowerCase() === id.toLowerCase() ||
+        parsed.orderNumber?.replace('#', '').toLowerCase() === id.replace('#', '').toLowerCase()
+      ) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Unable to read session order', e);
+  }
+
+  // 2. Check static mock orders
+  const cleanSearch = id.replace('#', '').toLowerCase();
+  return (
+    MOCK_ORDERS.find(
+      (order) =>
+        order.id.toLowerCase() === cleanSearch ||
+        order.orderNumber.replace('#', '').toLowerCase() === cleanSearch
+    ) || null
+  );
+}
+
+/**
+ * Save newly confirmed order to session storage for seamless confirmation page lookup
+ */
+export function saveCreatedOrder(order) {
+  try {
+    sessionStorage.setItem('crumb_bloom_latest_order', JSON.stringify(order));
+  } catch (e) {
+    console.warn('Unable to store order in session', e);
+  }
+}
+
+/**
+ * Retrieve all orders combining static history and active session orders
+ */
+export function getAllOrders() {
+  const orders = [...MOCK_ORDERS];
+  try {
+    const saved = sessionStorage.getItem('crumb_bloom_latest_order');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (!orders.some((o) => o.id === parsed.id)) {
+        orders.unshift(parsed);
+      }
+    }
+  } catch (e) {
+    console.warn('Unable to read session order', e);
+  }
+  return orders;
+}
+
+

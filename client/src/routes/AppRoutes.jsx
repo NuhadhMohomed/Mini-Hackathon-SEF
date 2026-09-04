@@ -10,6 +10,9 @@ import HomePage from '@/pages/HomePage';
 import CatalogPage from '@/pages/CatalogPage';
 import ProductDetailsPage from '@/pages/ProductDetailsPage';
 import CartPage from '@/pages/CartPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import OrderConfirmationPage from '@/pages/OrderConfirmationPage';
+import MyOrdersPage from '@/pages/MyOrdersPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import AppPlaceholderPage from '@/pages/AppPlaceholderPage';
@@ -24,6 +27,9 @@ export default function AppRoutes() {
         <Route path="/products" element={<CatalogPage />} />
         <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
+        <Route path="/my-orders" element={<MyOrdersPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
