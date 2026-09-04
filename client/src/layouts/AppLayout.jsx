@@ -70,47 +70,35 @@ export default function AppLayout() {
             </span>
           </NavLink>
 
-          <a
-            href="#products"
-            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-secondary-foreground hover:text-foreground hover:bg-surface-container font-medium transition-colors"
-            onClick={() => setMobileSidebarOpen(false)}
-          >
+          <NavLink to="/app/products" className={getNavLinkClass} onClick={() => setMobileSidebarOpen(false)}>
             <div className="flex items-center gap-3">
-              <Store className="w-4 h-4 text-muted-foreground" />
+              <Store className="w-4 h-4 text-primary" />
               <span>Products</span>
             </div>
             <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-              14
+              6
             </span>
-          </a>
+          </NavLink>
 
-          <a
-            href="#orders"
-            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-secondary-foreground hover:text-foreground hover:bg-surface-container font-medium transition-colors"
-            onClick={() => setMobileSidebarOpen(false)}
-          >
+          <NavLink to="/app/orders" className={getNavLinkClass} onClick={() => setMobileSidebarOpen(false)}>
             <div className="flex items-center gap-3">
-              <Receipt className="w-4 h-4 text-muted-foreground" />
+              <Receipt className="w-4 h-4 text-primary" />
               <span>Orders</span>
             </div>
             <span className="font-mono text-xs font-semibold text-primary bg-secondary px-2 py-0.5 rounded-full">
-              42
+              4
             </span>
-          </a>
+          </NavLink>
 
-          <a
-            href="#inventory"
-            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-secondary-foreground hover:text-foreground hover:bg-surface-container font-medium transition-colors"
-            onClick={() => setMobileSidebarOpen(false)}
-          >
+          <NavLink to="/app/inventory" className={getNavLinkClass} onClick={() => setMobileSidebarOpen(false)}>
             <div className="flex items-center gap-3">
-              <Package className="w-4 h-4 text-muted-foreground" />
+              <Package className="w-4 h-4 text-primary" />
               <span>Inventory</span>
             </div>
             <Badge variant="warning" dot={true} className="text-[10px] px-1.5 py-0.2">
               3 Low
             </Badge>
-          </a>
+          </NavLink>
 
           <a
             href="#schedule"
