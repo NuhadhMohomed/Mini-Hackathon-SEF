@@ -7,6 +7,9 @@ import AppLayout from '@/layouts/AppLayout';
 
 // Pages
 import HomePage from '@/pages/HomePage';
+import CatalogPage from '@/pages/CatalogPage';
+import ProductDetailsPage from '@/pages/ProductDetailsPage';
+import CartPage from '@/pages/CartPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import AppPlaceholderPage from '@/pages/AppPlaceholderPage';
@@ -18,6 +21,9 @@ export default function AppRoutes() {
       {/* Public Pages Layout */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<CatalogPage />} />
+        <Route path="/products/:id" element={<ProductDetailsPage />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>

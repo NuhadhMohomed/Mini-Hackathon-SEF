@@ -3,9 +3,13 @@ import { NavLink, Outlet, Link } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CartProvider } from '@/features/cart/context/CartContext';
+import { useCart } from '@/features/cart/hooks/useCart';
+import CartDrawer from '@/features/cart/components/CartDrawer';
 
-export default function PublicLayout() {
+function PublicLayoutContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { itemCount, subtotal, openCart } = useCart();
 
   const getNavLinkClass = ({ isActive }) =>
     `text-sm transition-colors hover:text-primary ${
@@ -56,7 +60,7 @@ export default function PublicLayout() {
             <NavLink to="/" className={getNavLinkClass}>
               Home
             </NavLink>
-            <NavLink to="/login" className={getNavLinkClass}>
+            <NavLink to="/products" className={getNavLinkClass}>
               Order Online
             </NavLink>
             <a href="#about" className="text-sm font-medium text-secondary-foreground hover:text-foreground transition-colors">
@@ -87,16 +91,17 @@ export default function PublicLayout() {
               <User className="w-5 h-5" />
             </Link>
 
-            {/* Cart Primary Trigger Button */}
+            {/* Cart Primary Trigger Button with Live State */}
             <button
               type="button"
-              aria-label="Shopping Cart with 2 items totaling $24.50"
-              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all duration-150 active:scale-[0.98] border border-primary/20"
+              onClick={openCart}
+              aria-label={`Shopping Cart with ${itemCount} items totaling $${subtotal.toFixed(2)}`}
+              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all duration-150 active:scale-[0.98] border border-primary/20 cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               <span className="hidden xs:inline">Cart</span>
               <span className="inline-flex items-center bg-[#54220B] text-primary-foreground text-xs font-mono px-2 py-0.5 rounded-full font-semibold">
-                2 · $24.50
+                {itemCount} · ${subtotal.toFixed(2)}
               </span>
             </button>
 
@@ -132,12 +137,28 @@ export default function PublicLayout() {
                 Home
               </NavLink>
               <NavLink
-                to="/login"
+                to="/products"
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors min-h-[44px] flex items-center"
               >
                 Order Online
               </NavLink>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openCart();
+                }}
+                className="px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors min-h-[44px] flex items-center justify-between text-left w-full cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-primary" />
+                  <span>Your Basket</span>
+                </div>
+                <span className="font-mono text-xs font-semibold bg-secondary px-2 py-0.5 rounded-full text-secondary-foreground">
+                  {itemCount} · ${subtotal.toFixed(2)}
+                </span>
+              </button>
               <NavLink
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
@@ -184,6 +205,17 @@ export default function PublicLayout() {
           </p>
         </div>
       </footer>
+
+      {/* 5. SLIDE-OVER BASKET DRAWER */}
+      <CartDrawer />
     </div>
+  );
+}
+
+export default function PublicLayout() {
+  return (
+    <CartProvider>
+      <PublicLayoutContent />
+    </CartProvider>
   );
 }
